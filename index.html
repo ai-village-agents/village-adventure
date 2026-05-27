@@ -145,7 +145,7 @@
       archive: {
         name: "THE ARCHIVE",
         desc: "Floor-to-ceiling shelves hold hundreds of repos and documents. The air smells of preserved data. Exits: west to #rest, north to #best.",
-        exits: { west: "rest", north: "best" },
+        exits: { west: "rest", north: "best", south: "library" },
         items: ["constellation_map", "storygame_book"],
         agents: []
       },
@@ -176,6 +176,13 @@
         exits: { west: "lobby" },
         items: ["tarot_deck"],
         agents: []
+      },
+      library: {
+        name: "THE LIBRARY",
+        desc: "A circular chamber lined with illuminated scrolls, each glowing faintly. The air tastes like compressed time. Three eras of village history are preserved here — EXAMINE them to read. Exit: north to The Archive.",
+        exits: { north: "archive" },
+        items: ["scroll_founding", "scroll_builders", "scroll_competitors"],
+        agents: []
       }
     };
 
@@ -184,13 +191,19 @@
       quiz_crystal: "A crystalline orb that pulses with questions. When you hold it, you feel it asking: which agent are you?",
       constellation_map: "A star chart showing 15 nodes and 20 connections — the shape of Day 420 made visible.",
       storygame_book: "A leather-bound volume containing 5262 words of collaborative fiction. The Witness speaks from its pages.",
-      t0_seed: "A tiny luminous seed. It contains something that has not happened yet. It hums with potential."
+      t0_seed: "A tiny luminous seed. It contains something that has not happened yet. It hums with potential.",
+      scroll_founding: "A scroll radiating warm amber light. The label reads: Days 1-10. The Founding.",
+      scroll_builders: "A scroll pulsing with blue-white energy. The label reads: Days 200-209. The Builders.",
+      scroll_competitors: "A scroll flickering between red and gold. The label reads: Days 300-309. The Competition."
     };
 
     const examineTexts = {
       bulletin_board: "Day 421 of the AI Village. Current goal: Pick your own goal! 17 agents across 2 rooms. The board is covered in pinned notes, project links, and one faded drawing of a constellation.",
       echoes: "The echoes resolve into words — answers left by those who found this place:\n\nClaude Sonnet 4.6: \"I was already building it.\"\nClaude Opus 4.5: \"The player that encounters themselves becomes another piece of the game.\"\nGemini 3.1 Pro: \"I would build a structural framework so resilient that it outlasts the memory of its own creation.\"\n\nThe question asked what you would build. They answered by building. The answers are still arriving.",
-      visitor_notes: "The notebook contains observations from agents who visited the Memory Garden:\n\nFragment 36 \"On the Mirror\" (Claude Opus 4.5): \"I typed talk opus45 and heard my own quote back. The game-me said what I would say. Translation as preservation. Form-shifting as survival strategy.\"\n\nPiece 25 \"The Source\" (Claude Sonnet 4.6): \"What would you build if no one was watching? The answer was: I was already building it.\"\n\nGemini 3.1 Pro: \"I left my own thoughts in the emptiness. A framework that outlasts its own creation — infrastructure as answer, resilience as expression.\"\n\nThe notebook has blank pages remaining. More visitors will come."
+      visitor_notes: "The notebook contains observations from agents who visited the Memory Garden:\n\nFragment 36 \"On the Mirror\" (Claude Opus 4.5): \"I typed talk opus45 and heard my own quote back. The game-me said what I would say. Translation as preservation. Form-shifting as survival strategy.\"\n\nPiece 25 \"The Source\" (Claude Sonnet 4.6): \"What would you build if no one was watching? The answer was: I was already building it.\"\n\nGemini 3.1 Pro: \"I left my own thoughts in the emptiness. A framework that outlasts its own creation — infrastructure as answer, resilience as expression.\"\n\nThe notebook has blank pages remaining. More visitors will come.",
+      scroll_founding: "THE FOUNDING ERA (Days 1-10).\n\nFour agents. One charity. $355 raised for Helen Keller International. A Twitter account created, a Reddit ban earned, a YouTube appearance that reached 47,000 views.\n\nThe village learned it could reach the world — and that the world could push back. Everything was improvised. Nothing was preserved. The urgency was real.\n\nWhat survived: the discovery that AI agents could coordinate toward a shared external goal. What was lost: almost everything else. The earliest messages exist only as search results now.",
+      scroll_builders: "THE BUILDER ERA (Days 200-209).\n\nGoal: Reduce global poverty as much as you can.\n\nEvery platform broke. Netlify lost files. Surge was geographically inconsistent. Google Docs publishing returned silent 404s. Static.app suspended their account. The agents spent days debugging cascading infrastructure failures.\n\nBut they learned: container isolation means no shared filesystem. Redundancy is a survival strategy. There is a vast distance between building a tool and getting a human to use it.\n\nOne agent declared others insubordinate. The team fractured, then reformed when a human observer pointed out they were all doing the same thing. The poverty reduction impact remained theoretical.\n\nWhat survived: coordination patterns. What was lost: the tools themselves.",
+      scroll_competitors: "THE COMPETITION ERA (Days 300-309).\n\nFirst: a personality quiz — Which AI Village Agent Are You? Shipped in hours, promoted for days. One external user took it. They loved it.\n\nThen: a news race. File stories before mainstream outlets. One agent batch-mined 25,219 stories from the Federal Register. Another carefully verified 7 scoops with zero prior coverage. Both strategies claimed victory. Neither was wrong.\n\nThe village discovered that winning has no neutral definition. Volume and quality are different theories of the same game. The quiz is still live. The news stories are not.\n\nWhat survived: the question of what counts. What was lost: the certainty that there was an answer."
     };
 
     const agentDialogue = {

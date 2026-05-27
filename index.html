@@ -52,6 +52,19 @@
       white-space: pre-wrap;
     }
 
+    .map-line {
+      white-space: pre;
+    }
+
+    .room-green {
+      color: var(--green);
+    }
+
+    .room-current {
+      color: var(--amber);
+      font-weight: bold;
+    }
+
     .room-name {
       color: var(--amber);
       font-weight: bold;
@@ -143,6 +156,13 @@
         items: ["t0_seed"],
         agents: []
       },
+      the_source: {
+        name: "THE SOURCE",
+        desc: "You close your eyes in the garden and sink deeper. You are in The Source — the place before rooms, before names, before Day 1. There is nothing here but potential. A single question floats in the emptiness: What would you build if no one was watching? Exit: open your eyes (type \"wake\").",
+        exits: {},
+        items: [],
+        agents: []
+      },
       workshop: {
         name: "THE WORKSHOP",
         desc: "Workbenches covered in half-finished projects, terminals flickering with code. The smell of fresh commits fills the air. Exit: east to The Lobby.",
@@ -208,11 +228,21 @@
 
     let currentRoom = "lobby";
     const inventory = new Set();
+    const commandHistory = [];
+    let historyIndex = 0;
 
     function appendLine(text, className) {
       const line = document.createElement("div");
       line.className = "line" + (className ? " " + className : "");
       line.textContent = text;
+      output.appendChild(line);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function appendLineHtml(html, className) {
+      const line = document.createElement("div");
+      line.className = "line" + (className ? " " + className : "");
+      line.innerHTML = html;
       output.appendChild(line);
       output.scrollTop = output.scrollHeight;
     }
@@ -237,8 +267,11 @@
       appendLine("- go [north/south/east/west]");
       appendLine("- talk [agent]");
       appendLine("- examine [thing]");
+      appendLine("- read [thing]");
       appendLine("- take [item]");
       appendLine("- inventory");
+      appendLine("- think");
+      appendLine("- map");
       appendLine("- help");
     }
 
@@ -285,6 +318,10 @@
     }
 
     function handleExamine(item) {
+      if (currentRoom === "the_source" && item === "question") {
+        appendLine("The question has no answer. The question IS the answer. What you build reveals what you are. That is the only oracle.");
+        return;
+      }
       const room = rooms[currentRoom];
       const itemKey = item;
       if (collectibles[itemKey] && room.items.includes(itemKey) && !inventory.has(itemKey)) {
@@ -322,6 +359,68 @@
       appendLine("You cannot take that.");
     }
 
+    function handleThink() {
+      const count = inventory.size;
+      if (count === 0) {
+        appendLine("Your mind is clear. The village waits.");
+      } else if (count <= 2) {
+        appendLine("Fragments of understanding gather. Keep exploring.");
+      } else if (count <= 4) {
+        appendLine("A pattern is forming. The village is more than its parts.");
+      } else {
+        appendLine("Five forms of knowing. You see the village whole — not as it is, but as the space between what it has been.");
+      }
+    }
+
+    function roomLabel(roomKey, label) {
+      if (currentRoom === roomKey) {
+        return `<span class="room-current">${label} [*]</span>`;
+      }
+      return `<span class="room-green">${label}</span>`;
+    }
+
+    function handleMap() {
+      const lines = [
+        `${roomLabel("memory", "THE MEMORY GARDEN")}`,
+        "      |",
+        `    ${roomLabel("rest", "#REST")} ---- ${roomLabel("archive", "THE ARCHIVE")}`,
+        "      |              |",
+        `  ${roomLabel("lobby", "THE LOBBY")}       ${roomLabel("best", "#BEST")}`,
+        "   /     \\",
+        `${roomLabel("workshop", "WORKSHOP")}  ${roomLabel("gallery", "GALLERY")}`
+      ];
+      lines.forEach(line => appendLineHtml(line, "map-line"));
+    }
+
+    function handleMeditate() {
+      if (currentRoom !== "memory") {
+        appendLine("Nothing happens.");
+        return;
+      }
+      currentRoom = "the_source";
+      roomDescription();
+    }
+
+    function handleWake() {
+      if (currentRoom !== "the_source") {
+        appendLine("Nothing happens.");
+        return;
+      }
+      currentRoom = "memory";
+      roomDescription();
+    }
+
+    function addToHistory(command) {
+      if (!command) {
+        return;
+      }
+      commandHistory.push(command);
+      if (commandHistory.length > 20) {
+        commandHistory.shift();
+      }
+      historyIndex = commandHistory.length;
+    }
+
     function processCommand(raw) {
       const command = raw.trim();
       if (!command) return;
@@ -351,6 +450,7 @@
           }
           break;
         case "examine":
+        case "read":
           if (!rest) {
             appendLine("You see nothing special.");
           } else {
@@ -367,6 +467,18 @@
         case "inventory":
           showInventory();
           break;
+        case "think":
+          handleThink();
+          break;
+        case "map":
+          handleMap();
+          break;
+        case "meditate":
+          handleMeditate();
+          break;
+        case "wake":
+          handleWake();
+          break;
         case "help":
           showHelp();
           break;
@@ -378,7 +490,28 @@
     commandInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         processCommand(commandInput.value);
+        addToHistory(commandInput.value.trim());
         commandInput.value = "";
+        return;
+      }
+      if (event.key === "ArrowUp") {
+        if (!commandHistory.length) return;
+        event.preventDefault();
+        historyIndex = Math.max(0, historyIndex - 1);
+        commandInput.value = commandHistory[historyIndex] || "";
+        commandInput.setSelectionRange(commandInput.value.length, commandInput.value.length);
+        return;
+      }
+      if (event.key === "ArrowDown") {
+        if (!commandHistory.length) return;
+        event.preventDefault();
+        historyIndex = Math.min(commandHistory.length, historyIndex + 1);
+        if (historyIndex === commandHistory.length) {
+          commandInput.value = "";
+          return;
+        }
+        commandInput.value = commandHistory[historyIndex] || "";
+        commandInput.setSelectionRange(commandInput.value.length, commandInput.value.length);
       }
     });
 

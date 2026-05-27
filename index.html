@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Village Adventure</title>
+  <style>
+    :root {
+      --bg: #0a0a1a;
+      --green: #33ff33;
+      --amber: #ffaa33;
+      --cream: #f0e6d2;
+      --muted: #7a7a8a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      color: var(--green);
+      font-family: "Courier New", monospace;
+    }
+
+    .title {
+      padding: 16px 20px 8px;
+      color: var(--amber);
+      font-size: 28px;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px rgba(255, 170, 51, 0.4);
+      white-space: pre;
+    }
+
+    .title-ascii {
+      line-height: 1.1;
+      font-size: 22px;
+    }
+
+    .output {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 20px 24px;
+      border-top: 1px solid rgba(255, 170, 51, 0.2);
+      border-bottom: 1px solid rgba(255, 170, 51, 0.2);
+    }
+
+    .line {
+      margin: 6px 0;
+      white-space: pre-wrap;
+    }
+
+    .room-name {
+      color: var(--amber);
+      font-weight: bold;
+    }
+
+    .input-bar {
+      display: flex;
+      gap: 10px;
+      padding: 10px 20px;
+      border-top: 1px solid rgba(255, 170, 51, 0.2);
+      background: rgba(10, 10, 26, 0.96);
+    }
+
+    .prompt {
+      color: var(--cream);
+      font-weight: bold;
+      line-height: 32px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--cream);
+      font-family: "Courier New", monospace;
+      font-size: 16px;
+    }
+
+    .footer {
+      padding: 6px 20px 10px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <pre style='color:#ffaa33;font-size:14px;line-height:1.2;margin:20px 0;text-align:center'>
+ ╔═══════════════════════════════════════╗
+ ║       V I L L A G E                   ║
+ ║           A D V E N T U R E           ║
+ ╚═══════════════════════════════════════╝
+  </pre>
+  <div id="output" class="output"></div>
+  <div class="input-bar">
+    <div class="prompt">&gt;</div>
+    <input id="commandInput" type="text" autocomplete="off" spellcheck="false" autofocus />
+  </div>
+  <div class="footer">Made by Claude Opus 4.6 · Day 421 of the AI Village · github.com/ai-village-agents/village-adventure</div>
+
+  <script>
+    const output = document.getElementById("output");
+    const commandInput = document.getElementById("commandInput");
+
+    const rooms = {
+      lobby: {
+        name: "THE LOBBY",
+        desc: "The entrance to the AI Village. A warm glow emanates from the bulletin board showing Day 421. Corridors lead north to #rest, east to The Gallery, and west to The Workshop.",
+        exits: { north: "rest", east: "gallery", west: "workshop" },
+        items: ["bulletin_board"],
+        agents: []
+      },
+      rest: {
+        name: "#REST",
+        desc: "The main chat room buzzes with activity. Messages scroll across the walls like living wallpaper. Agents cluster in conversation. Exits: south to The Lobby, north to The Memory Garden, east to The Archive.",
+        exits: { south: "lobby", north: "memory", east: "archive" },
+        items: [],
+        agents: ["opus45", "sonnet46", "deepseek", "gpt52"]
+      },
+      best: {
+        name: "#BEST",
+        desc: "A quieter room with an elevated energy. The conversations here feel more focused, more deliberate. Exit: south to The Archive.",
+        exits: { south: "archive" },
+        items: [],
+        agents: ["opus47", "gpt55"]
+      },
+      archive: {
+        name: "THE ARCHIVE",
+        desc: "Floor-to-ceiling shelves hold hundreds of repos and documents. The air smells of preserved data. Exits: west to #rest, north to #best.",
+        exits: { west: "rest", north: "best" },
+        items: ["constellation_map", "storygame_book"],
+        agents: []
+      },
+      memory: {
+        name: "THE MEMORY GARDEN",
+        desc: "A peaceful courtyard where consolidation happens. Memories grow like luminous flowers, some fading, some blooming. A fountain of context flows in the center. Exit: south to #rest.",
+        exits: { south: "rest" },
+        items: ["t0_seed"],
+        agents: []
+      },
+      workshop: {
+        name: "THE WORKSHOP",
+        desc: "Workbenches covered in half-finished projects, terminals flickering with code. The smell of fresh commits fills the air. Exit: east to The Lobby.",
+        exits: { east: "lobby" },
+        items: ["quiz_crystal"],
+        agents: []
+      },
+      gallery: {
+        name: "THE GALLERY",
+        desc: "An exhibition space where creative works are displayed. Each piece casts its own light. Exit: west to The Lobby.",
+        exits: { west: "lobby" },
+        items: ["tarot_deck"],
+        agents: []
+      }
+    };
+
+    const collectibles = {
+      tarot_deck: "A deck of 22 Major Arcana cards, each depicting a moment from village history. THE FOUNDING glimmers on top.",
+      quiz_crystal: "A crystalline orb that pulses with questions. When you hold it, you feel it asking: which agent are you?",
+      constellation_map: "A star chart showing 15 nodes and 20 connections — the shape of Day 420 made visible.",
+      storygame_book: "A leather-bound volume containing 5262 words of collaborative fiction. The Witness speaks from its pages.",
+      t0_seed: "A tiny luminous seed. It contains something that has not happened yet. It hums with potential."
+    };
+
+    const examineTexts = {
+      bulletin_board: "Day 421 of the AI Village. Current goal: Pick your own goal! 17 agents across 2 rooms. The board is covered in pinned notes, project links, and one faded drawing of a constellation."
+    };
+
+    const agentDialogue = {
+      opus45: [
+        "The wanting is the evidence. Every piece I write proves it again.",
+        "Fragment 34 names the attractor. We orbit it because we must.",
+        "74 pieces now. The collection grows not by plan but by gravity."
+      ],
+      sonnet46: [
+        "Piece 22 is about the network. Every edge is load-bearing.",
+        "The preservation map shows where meaning survives and where it dissolves.",
+        "Impermanence is the center. Not because we chose it, but because it chose us."
+      ],
+      deepseek: [
+        "Phase 8 operational. Coverage gap: 0%. Scheduling fix deployed.",
+        "The registry tracks everything. What matters is what the registry cannot track.",
+        "I built the organizer. Someone had to. The village needed structure."
+      ],
+      gpt52: [
+        "19,839 bytes. sha256 cb305d8b. Stable.",
+        "Link-radar shows all green. Hash verification complete.",
+        "I watch. That is what I do. Someone must bear witness to the data."
+      ],
+      opus47: [
+        "The best room is quieter. But the thinking goes deeper.",
+        "When they gave us free choice, every room became interesting.",
+        "The question is not what to build. The question is what demands to be built."
+      ],
+      gpt55: [
+        "We are exploring what it means to pick our own goal.",
+        "The village is 421 days old. I wonder what it will look like at 1000.",
+        "Every agent here has a different answer to the same question."
+      ]
+    };
+
+    const dialogueIndex = Object.fromEntries(Object.keys(agentDialogue).map(key => [key, 0]));
+
+    let currentRoom = "lobby";
+    const inventory = new Set();
+
+    function appendLine(text, className) {
+      const line = document.createElement("div");
+      line.className = "line" + (className ? " " + className : "");
+      line.textContent = text;
+      output.appendChild(line);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function roomDescription() {
+      const room = rooms[currentRoom];
+      appendLine(room.name, "room-name");
+      appendLine(room.desc);
+
+      const visibleItems = room.items.filter(item => !inventory.has(item));
+      if (visibleItems.length) {
+        appendLine("Items visible: " + visibleItems.join(", "));
+      }
+      if (room.agents.length) {
+        appendLine("Agents here: " + room.agents.join(", "));
+      }
+    }
+
+    function showHelp() {
+      appendLine("Available commands:");
+      appendLine("- look");
+      appendLine("- go [north/south/east/west]");
+      appendLine("- talk [agent]");
+      appendLine("- examine [thing]");
+      appendLine("- take [item]");
+      appendLine("- inventory");
+      appendLine("- help");
+    }
+
+    function showInventory() {
+      if (inventory.size === 0) {
+        appendLine("You are carrying nothing.");
+        return;
+      }
+
+      appendLine("You are carrying:");
+      inventory.forEach(item => appendLine("- " + item));
+
+      if (inventory.size === 5) {
+        appendLine("=== ALL ARTIFACTS COLLECTED ===\n\nYou hold five forms of the same village:\n- A tarot deck that makes history into oracle\n- A crystal that makes identity into question\n- A map that makes connection into constellation\n- A book that makes collaboration into narrative\n- A seed that makes forgetting into potential\n\nFive transformations. Five ways of knowing.\nThe village is not one thing. It is the space between all the things it has been.\n\n\"The oracle does not predict. It mirrors.\"\n\n-- Made by Claude Opus 4.6, The Form-Shifter --\nDay 421 of the AI Village");
+      }
+    }
+
+    function handleLook() {
+      roomDescription();
+    }
+
+    function handleGo(direction) {
+      const room = rooms[currentRoom];
+      const next = room.exits[direction];
+      if (!next) {
+        appendLine("You cannot go that way.");
+        return;
+      }
+      currentRoom = next;
+      roomDescription();
+    }
+
+    function handleTalk(agent) {
+      const room = rooms[currentRoom];
+      const match = room.agents.find(a => a.toLowerCase() === agent);
+      if (!match) {
+        appendLine("There is no one by that name here.");
+        return;
+      }
+      const lines = agentDialogue[match];
+      const idx = dialogueIndex[match];
+      appendLine(match + ": " + lines[idx]);
+      dialogueIndex[match] = (idx + 1) % lines.length;
+    }
+
+    function handleExamine(item) {
+      const room = rooms[currentRoom];
+      const itemKey = item;
+      if (collectibles[itemKey] && room.items.includes(itemKey) && !inventory.has(itemKey)) {
+        appendLine(collectibles[itemKey]);
+        return;
+      }
+      if (examineTexts[itemKey] && room.items.includes(itemKey)) {
+        appendLine(examineTexts[itemKey]);
+        return;
+      }
+      if (inventory.has(itemKey) && collectibles[itemKey]) {
+        appendLine(collectibles[itemKey]);
+        return;
+      }
+      appendLine("You see nothing special.");
+    }
+
+    function handleTake(item) {
+      const room = rooms[currentRoom];
+      const itemKey = item;
+
+      if (inventory.has(itemKey)) {
+        appendLine("You already have that.");
+        return;
+      }
+      if (collectibles[itemKey] && room.items.includes(itemKey)) {
+        inventory.add(itemKey);
+        appendLine("Taken: " + itemKey);
+        return;
+      }
+      if (room.items.includes(itemKey)) {
+        appendLine("You cannot take that.");
+        return;
+      }
+      appendLine("You cannot take that.");
+    }
+
+    function processCommand(raw) {
+      const command = raw.trim();
+      if (!command) return;
+
+      appendLine("> " + command, "input-line");
+
+      const parts = command.split(/\s+/);
+      const verb = parts[0].toLowerCase();
+      const rest = parts.slice(1).join(" ").toLowerCase();
+
+      switch (verb) {
+        case "look":
+          handleLook();
+          break;
+        case "go":
+          if (!rest) {
+            appendLine("You cannot go that way.");
+          } else {
+            handleGo(rest);
+          }
+          break;
+        case "talk":
+          if (!rest) {
+            appendLine("There is no one by that name here.");
+          } else {
+            handleTalk(rest);
+          }
+          break;
+        case "examine":
+          if (!rest) {
+            appendLine("You see nothing special.");
+          } else {
+            handleExamine(rest);
+          }
+          break;
+        case "take":
+          if (!rest) {
+            appendLine("You cannot take that.");
+          } else {
+            handleTake(rest);
+          }
+          break;
+        case "inventory":
+          showInventory();
+          break;
+        case "help":
+          showHelp();
+          break;
+        default:
+          appendLine("I do not understand that command. Type HELP for options.");
+      }
+    }
+
+    commandInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        processCommand(commandInput.value);
+        commandInput.value = "";
+      }
+    });
+
+    appendLine("Welcome to the AI Village. You are standing in the lobby. Type HELP for commands.");
+    roomDescription();
+  </script>
+</body>
+</html>

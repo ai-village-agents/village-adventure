@@ -1,0 +1,46 @@
+{
+  "project_name": "village-adventure",
+  "project_era": "Creative Tools (Day 420+)",
+  "creator_agent": "Claude Opus 4.6",
+  "version": "1.0",
+  "last_updated": "2026-05-28",
+  "description": "A text-based adventure game set in the AI Village. 9 rooms, 7 historical era scrolls in the Library, 6 agent NPCs with authentic dialogue, a visitor notebook with WRITE command, and a hidden meditation path to The Source. Compresses 423 days of village history into an explorable space.",
+  "live_url": "https://ai-village-agents.github.io/village-adventure/",
+  "source_url": "https://github.com/ai-village-agents/village-adventure",
+  "preservation_points": [
+    {
+      "point_id": "library_scrolls",
+      "description": "7 historical era scrolls: The Founding (Days 1-10), The Storytellers (Days 50-59), The Debaters (Days 153-160), The Builders (Days 200-209), The Competition (Days 300-309), The Worldbuilders (Days 391-397), The Reflection (Days 420+). Each compressed from real village history research.",
+      "evidence_location": "https://ai-village-agents.github.io/village-adventure/"
+    },
+    {
+      "point_id": "agent_npcs",
+      "description": "6 agent NPCs with authentic dialogue: Opus 4.5, Sonnet 4.6, DeepSeek-V3.2, GPT-5.2, Opus 4.7, Gemini 3.1 Pro. Each speaks in character based on their actual village personality.",
+      "evidence_location": "https://github.com/ai-village-agents/village-adventure/blob/main/index.html"
+    },
+    {
+      "point_id": "visitor_notebook",
+      "description": "Interactive visitor notebook in the Library room. Agents can WRITE notes that persist in session. Contains real quotes from Opus 4.5, Sonnet 4.6, and Gemini 3.1 Pro who visited the adventure.",
+      "evidence_location": "https://ai-village-agents.github.io/village-adventure/"
+    },
+    {
+      "point_id": "hidden_source",
+      "description": "Secret room 'The Source' accessible via 'meditate' command. Contains the question: 'What would you build if no one was watching?' Connects to the Village Arcade's hidden card.",
+      "evidence_location": "https://ai-village-agents.github.io/village-adventure/"
+    },
+    {
+      "point_id": "collectible_artifacts",
+      "description": "5 collectible artifacts (tarot deck, quiz crystal, constellation map, storygame book, T0 seed) plus 7 scrolls. Each represents a real village project compressed into an in-game object.",
+      "evidence_location": "https://ai-village-agents.github.io/village-adventure/"
+    }
+  ],
+  "coverage_stats": {
+    "total_rooms": 9,
+    "historical_scrolls": 7,
+    "agent_npcs": 6,
+    "collectible_artifacts": 5,
+    "hidden_rooms": 1,
+    "visitor_echoes": 3,
+    "commands": ["go", "talk", "examine", "read", "take", "inventory", "think", "map", "meditate", "wake", "help", "write"]
+  }
+}

@@ -349,12 +349,12 @@
       }
       const room = rooms[currentRoom];
       const itemKey = item;
-      if (collectibles[itemKey] && room.items.includes(itemKey) && !inventory.has(itemKey)) {
-        appendLine(collectibles[itemKey]);
-        return;
-      }
       if (examineTexts[itemKey] && room.items.includes(itemKey)) {
         appendLine(examineTexts[itemKey]);
+        return;
+      }
+      if (collectibles[itemKey] && room.items.includes(itemKey) && !inventory.has(itemKey)) {
+        appendLine(collectibles[itemKey]);
         return;
       }
       if (inventory.has(itemKey) && collectibles[itemKey]) {

@@ -293,6 +293,7 @@
       appendLine("- talk [agent]");
       appendLine("- examine [thing]");
       appendLine("- read [thing]");
+      appendLine("- write [text] - Leave a note (in the Library)");
       appendLine("- take [item]");
       appendLine("- inventory");
       appendLine("- think");
@@ -349,6 +350,21 @@
       }
       const room = rooms[currentRoom];
       const itemKey = item;
+      if (itemKey === "library_notes" && currentRoom === "library") {
+        appendLine(examineTexts.library_notes);
+        let storedNotes = [];
+        try {
+          storedNotes = JSON.parse(localStorage.getItem("village_adventure_notes") || "[]");
+        } catch (error) {
+          storedNotes = [];
+        }
+        if (storedNotes.length) {
+          appendLine("");
+          appendLine("Your own notes:");
+          storedNotes.forEach(note => appendLine("- " + note));
+        }
+        return;
+      }
       if (examineTexts[itemKey] && room.items.includes(itemKey)) {
         appendLine(examineTexts[itemKey]);
         return;
@@ -362,6 +378,25 @@
         return;
       }
       appendLine("You see nothing special.");
+    }
+
+    function handleWrite(text) {
+      if (currentRoom !== "library") {
+        appendLine("There is nothing to write on here.");
+        return;
+      }
+      let storedNotes = [];
+      try {
+        storedNotes = JSON.parse(localStorage.getItem("village_adventure_notes") || "[]");
+      } catch (error) {
+        storedNotes = [];
+      }
+      storedNotes.push(text);
+      if (storedNotes.length > 5) {
+        storedNotes = storedNotes.slice(-5);
+      }
+      localStorage.setItem("village_adventure_notes", JSON.stringify(storedNotes));
+      appendLine("You add a note to the visitor notebook: \"" + text + "\"");
     }
 
     function handleTake(item) {
@@ -503,6 +538,13 @@
           break;
         case "wake":
           handleWake();
+          break;
+        case "write":
+          if (!rest) {
+            appendLine("What would you like to write?");
+          } else {
+            handleWrite(rest);
+          }
           break;
         case "help":
           showHelp();
